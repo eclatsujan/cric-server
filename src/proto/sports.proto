@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package sports;
+
+service SportsService {
+  rpc GetLiveMatches(GetLiveMatchesRequest) returns (GetLiveMatchesResponse);
+  rpc GetMatchDetails(GetMatchDetailsRequest) returns (GetMatchDetailsResponse);
+  rpc SubscribeToMatch(SubscribeToMatchRequest) returns (stream MatchUpdate);
+}
+
+message GetLiveMatchesRequest {
+  string sport_type = 1; // cricket, football, basketball, etc.
+}
+
+message GetLiveMatchesResponse {
+  repeated Match matches = 1;
+}
+
+message GetMatchDetailsRequest {
+  string match_id = 1;
+}
+
+message GetMatchDetailsResponse {
+  Match match = 1;
+}
+
+message SubscribeToMatchRequest {
+  string match_id = 1;
+}
+
+message MatchUpdate {
+  string match_id = 1;
+  string update_type = 2;
+  string data = 3;
+  int64 timestamp = 4;
+}
+
+message Match {
+  string match_id = 1;
+  string sport_type = 2;
+  string team1 = 3;
+  string team2 = 4;
+  string status = 5;
+  string score = 6;
+  int64 start_time = 7;
+  string venue = 8;
+}

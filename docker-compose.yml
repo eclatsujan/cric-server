@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  cricket-server:
+    build: .
+    ports:
+      - "50051:50051"
+    environment:
+      - NODE_ENV=production
+      - PORT=50051
+      - VALKEY_HOST=valkey
+      - VALKEY_PORT=6379
+    depends_on:
+      - valkey
+    restart: unless-stopped
+    container_name: cricket-grpc-server
+
+  valkey:
+    image: valkey/valkey:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - valkey-data:/data
+    restart: unless-stopped
+    container_name: cricket-valkey
+
+volumes:
+  valkey-data:
