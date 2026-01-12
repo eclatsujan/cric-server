@@ -4,7 +4,8 @@
   "description": "gRPC authentication server for Cricket mobile app",
   "main": "dist/server.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run copy-proto",
+    "copy-proto": "mkdir -p dist/proto && cp src/proto/*.proto dist/proto/",
     "start": "node dist/server.js",
     "dev": "nodemon --watch src --exec ts-node src/server.ts",
     "clean": "rm -rf dist"

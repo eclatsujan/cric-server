@@ -29,6 +29,7 @@ RUN npm ci --only=production
 
 # Copy built files from builder stage
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/src/proto ./dist/proto
 
 # Expose gRPC port
 EXPOSE 50051
