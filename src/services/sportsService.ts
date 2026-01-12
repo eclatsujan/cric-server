@@ -74,79 +74,19 @@ const mockMatches: Map<string, Match> = new Map([
 ]);
 
 // Initialize Valkey indexes for matches
-async function iniasync (
-    call: ServerUnaryCall<GetLiveMatchesRequest, GetLiveMatchesResponse>,
-    callback: sendUnaryData<GetLiveMatchesResponse>
-  ) => {
-    const { sport_type } = call.request;
-    
-    try {
-      let matchIds: string[];
-
-      if (sport_type) {
-        // Get matches by sport type from Valkey index
-        matchIds = await valkeyClient.smembers(`sport:${sport_type}`);
-      } else {
-        // Get all match IDs
-        matchIds = Array.from(mockMatches.keys());
-      }async (
-    call: ServerUnaryCall<GetMatchDetailsRequest, GetMatchDetailsResponse>,
-    callback: sendUnaryData<GetMatchDetailsResponse>
-  ) => {
-    const { match_id } = call.request;
-
-    try {
-      // Fetch match details from Valkey
-      const matchData = await valkeyClient.hgetall(`match:${match_id}`);
-
-      if (!matchData || !matchData.match_id) {
-        callback({
-          code: 5, // NOT_FOUND
-          message: `Match ${match_id} not found`
-        });
-        return;
-      }
-
-      const match: Match = {
-        match_id: matchData.match_id,
-        sport_type: matchData.sport_type,
-        team1: matchData.team1,
-        team2: matchData.team2,
-        status: matchData.status,
-        score: matchData.score,
-        start_time: parseInt(matchData.start_time),
-        venue: matchData.venue
-      };
-
-      console.log(`🔍 Fetching details for match: ${match_id} from Valkey`);
-      callback(null, { match });
-    } catch (error) {
-      console.error('Error fetching match from Valkey:', error);
-      // Fallback to mock data
-      const match = mockMatches.get(match_id);
-      if (!match) {
-        callback({
-          code: 5,
-          message: `Match ${match_id} not found`
-        });
-        return;
-      }
-      callback(null, { match });
-    }
-        }
-      }
-
-      console.log(`📊 Fetching live matches for: ${sport_type || 'all sports'} from Valkey`);
-      
-      callback(null, { matches });
-    } catch (error) {
-      console.error('Error fetching matches from Valkey:', error);
-      // Fallback to mock data
-      const matches = Array.from(mockMatches.values()).filter(
-        match => !sport_type || match.sport_type === sport_type
-      );
-      callback(null, { matches });
-    }
+async function initializeMatchIndexes() {
+  try {
+    for (const [matchId, match] of mockMatches) {
+      // Store match data in Valkey with a hash
+      await valkeyClient.hset(`match:${matchId}`, {
+        match_id: match.match_id,
+        sport_type: match.sport_type,
+        team1: match.team1,
+        team2: match.team2,
+        status: match.status,
+        score: match.score,
+        start_time: match.start_time.toString(),
+        venue: match.venue
       });
 
       // Create indexes for quick lookups
